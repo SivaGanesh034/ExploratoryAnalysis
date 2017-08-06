@@ -1,10 +1,4 @@
-## InstaCart Exploratory Analysis.
-##Each entity (customer, product, order, aisle, etc.) has an associated unique id. 
-T#hese files specify which products were purchased in each order. 
-#order_products__prior.csv contains previous order contents for all customers. 
-#'reordered' indicates that the customer has a previous order that contains the product. 
-#'#Note that some orders will have no reordered items. 
-#You may predict an explicit 'None' value for orders with no reordered items.
+
 library(data.table)
 library(dplyr)
 library(ggplot2)
@@ -92,7 +86,7 @@ order_products %>%
 
 #Bestsellers
 #Let's have a look which products are sold most often 
-tmp <- order_products %>% 
+tmp = order_products %>% 
   group_by(product_id) %>% 
   summarize(count = n()) %>% 
   top_n(10, wt = count) %>%
@@ -106,7 +100,7 @@ tmp %>%
   theme(axis.text.x=element_text(angle=90, hjust=1),axis.title.x = element_blank())
 
 #How often do people order the same items again?
-tmp <- order_products %>% 
+tmp = order_products %>% 
   group_by(reordered) %>% 
   summarize(count = n()) %>% 
   mutate(reordered = as.factor(reordered)) %>%
@@ -122,7 +116,7 @@ tmp %>%
 #Now here it becomes really interesting. 
 #These 10 products have the highest probability of being reordered.
 
-tmp <-order_products %>% 
+tmp = order_products %>% 
   group_by(product_id) %>% 
   summarize(proportion_reordered = mean(reordered), n=n()) %>% 
   filter(n>40) %>% 
@@ -140,7 +134,7 @@ tmp %>%
 #Which item do people put into the cart first?
 #People seem to be quite certain about Multifold Towels and if they buy them, put them into their cart first in 66% of the time.
 
-tmp <- order_products %>% 
+tmp = order_products %>% 
   group_by(product_id, add_to_cart_order) %>% 
   summarize(count = n()) %>% mutate(pct=count/sum(count)) %>% 
   filter(add_to_cart_order == 1, count>10) %>% 
@@ -176,10 +170,10 @@ order_products %>%
 
 #Organic vs Non-organic
 
-products <- products %>% 
+products = products %>% 
   mutate(organic=ifelse(str_detect(str_to_lower(products$product_name),'organic'),"organic","not organic"), organic= as.factor(organic))
 
-tmp <- order_products %>% 
+tmp = order_products %>% 
   left_join(products, by="product_id") %>% 
   group_by(organic) %>% 
   summarize(count = n()) %>% 
@@ -187,17 +181,17 @@ tmp <- order_products %>%
 kable(tmp)
 
 #Reordering Organic vs Non-Organic
-tmp <- order_products %>% left_join(products,by="product_id") %>% group_by(organic) %>% summarize(mean_reordered = mean(reordered))
+tmp = order_products %>% left_join(products,by="product_id") %>% group_by(organic) %>% summarize(mean_reordered = mean(reordered))
 kable(tmp)
 
 #Visualizing the Product Portfolio
 library(treemap)
 
-tmp <- products %>% group_by(department_id, aisle_id) %>% summarize(n=n())
-tmp <- tmp %>% left_join(departments,by="department_id")
-tmp <- tmp %>% left_join(aisles,by="aisle_id")
+tmp = products %>% group_by(department_id, aisle_id) %>% summarize(n=n())
+tmp = tmp %>% left_join(departments,by="department_id")
+tmp = tmp %>% left_join(aisles,by="aisle_id")
 
-tmp2<-order_products %>%
+tmp2=order_products %>%
   group_by(product_id) %>% 
   summarize(count=n()) %>% 
   left_join(products,by="product_id") %>% 
